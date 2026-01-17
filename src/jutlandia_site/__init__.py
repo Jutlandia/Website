@@ -378,7 +378,10 @@ class MyClient(discord.Client):
         time = after.start_time.strftime("%H:%M")
 
         try:
-            ics_events.remove_event(before.name)
+            try:
+                ics_events.remove_event(before.name)
+            except:
+                logger.info("Cannot remove event from calender, as it does not exist")
             ics_events.add_event(after.name, location, after.start_time, after.url)
             
             with app.app_context():
