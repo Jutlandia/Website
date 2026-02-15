@@ -178,7 +178,7 @@
               ExecStart = "${run_site}";
               Restart = "on-failure";
               LoadCredential = [
-                "discord-infra-client-secret:${cfg.infraClientSecretFile}"
+                "discord-infra-client-secret:${cfg.discord.infraClientSecretFile}"
                 "discord-client-secret:${cfg.discord.clientSecretFile}"
                 "app-secret-key:${cfg.appSecretKeyFile}"
               ];
