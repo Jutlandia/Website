@@ -107,15 +107,15 @@
       {
         options.services.website = {
           enable = mkEnableOption "Website service";
+
+          domain = mkOption {
+            type = types.str;
+          };
+
           databaseUrl = mkOption {
             type = types.str;
           };
-          appSecretKey = mkOption {
-            type = types.str;
-          };
-          discordClientSecret = mkOption {
-            type = types.str;
-          };
+
           discordClientId = mkOption {
             type = types.str;
           };
@@ -128,8 +128,15 @@
           discordRedirectUri = mkOption {
             type = types.str;
           };
-          infraClientSecret = mkOption {
-            type = types.str;
+
+          discordClientSecretFile = mkOption {
+            type = types.path;
+          };
+          appSecretKeyFile = mkOption {
+            type = types.path;
+          };
+          infraClientSecretFile = mkOption {
+            type = types.path;
           };
         };
 
@@ -141,25 +148,49 @@
             environment = {
               DISCORD_GUILD_ID = cfg.discordGuildId;
               DISCORD_CLIENT_ID = cfg.discordClientId;
-              DISCORD_CLIENT_SECRET = cfg.discordClientSecret;
               DISCORD_ADMIN_ROLE_ID = cfg.discordAdminRoleId;
               DISCORD_REDIRECT_URI = cfg.discordRedirectUri;
-              DISCORD_INFRA_CLIENT_SECRET = cfg.infraClientSecret;
 
               SQL_DB_URI = cfg.databaseUrl;
-              APP_SECRET_KEY = cfg.appSecretKey;
             };
-            serviceConfig = {
+            serviceConfig = let
+              run_site = pkgs.writeShellScript "load-secrets-and-run.sh" ''
+              DISCORD_INFRA_CLIENT_SECRET="$(cat $CREDENTIALS_DIRECTORY/discord-infra-client-secret)"
+              DISCORD_CLIENT_SECRET="$(cat $CREDENTIALS_DIRECTORY/discord-client-secret)"
+              APP_SECRET_KEY="$(cat $CREDENTIALS_DIRECTORY/app-secret-key)"
+
+              ${jutlandia-site}/bin/run_site
+              '';
+              in {
               PermissionsStartOnly = true;
               LimitNPROC = 512;
               LimitNOFILE = 1048576;
               NoNewPrivileges = true;
-              DynamicUser = true;
-              # This is the key change: point to the new package path
-              ExecStart = "${jutlandia-site}/bin/run_site";
+              User = "jut-website";
+              ExecStart = "${run_site}";
               Restart = "on-failure";
+              LoadCredential = [
+                "discord-infra-client-secret:${cfg.infraClientSecretFile}"
+                "discord-client-secret:${cfg.discordClientSecretFile}"
+                "app-secret-key:${cfg.appSecretKeyFile}"
+              ];
             };
           };
+
+          services.nginx.enable = true;
+          services.nginx.virtHosts."${cfg.domain}" = {
+            location."/" = {
+              proxyPass = "http://127.0.0.1:5000";
+            };
+          };
+            
+
+          users.users.jut-website = {
+            isSystemUser = true;
+            description = "User for the website service";
+            group = "jut-website";
+          };
+          users.groups.jut-website = {};
         };
       };
   };
