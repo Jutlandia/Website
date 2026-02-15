@@ -162,9 +162,9 @@
               SQL_DB_URI = cfg.databaseUrl;
             };
             script = ''
-              DISCORD_INFRA_CLIENT_SECRET="$(cat $CREDENTIALS_DIRECTORY/discord-infra-client-secret)"
-              DISCORD_CLIENT_SECRET="$(cat $CREDENTIALS_DIRECTORY/discord-client-secret)"
-              APP_SECRET_KEY="$(cat $CREDENTIALS_DIRECTORY/app-secret-key)"
+              export DISCORD_INFRA_CLIENT_SECRET="$(cat $CREDENTIALS_DIRECTORY/discord-infra-client-secret)"
+              export DISCORD_CLIENT_SECRET="$(cat $CREDENTIALS_DIRECTORY/discord-client-secret)"
+              export APP_SECRET_KEY="$(cat $CREDENTIALS_DIRECTORY/app-secret-key)"
 
               ${jutlandia-site}/bin/run_site
             '';
