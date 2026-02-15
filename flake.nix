@@ -114,7 +114,7 @@
 
           databaseUrl = mkOption {
             type = types.str;
-            default = "sqlite:///var/lib/website/jutlandia.db";
+            default = "sqlite:////var/lib/website/jutlandia.db";
           };
 
           appSecretKeyFile = mkOption {
