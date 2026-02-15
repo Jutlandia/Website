@@ -114,29 +114,37 @@
 
           databaseUrl = mkOption {
             type = types.str;
+            default = "sqlite:///var/lib/website/jutlandia.db";
           };
 
-          discordClientId = mkOption {
-            type = types.str;
-          };
-          discordGuildId = mkOption {
-            type = types.str;
-          };
-          discordAdminRoleId = mkOption {
-            type = types.str;
-          };
-          discordRedirectUri = mkOption {
-            type = types.str;
-          };
-
-          discordClientSecretFile = mkOption {
-            type = types.path;
-          };
           appSecretKeyFile = mkOption {
             type = types.path;
           };
-          infraClientSecretFile = mkOption {
-            type = types.path;
+
+          discord = mkOption {
+            type = with types; submodule {
+              options = {
+                clientId = mkOption {
+                  type = types.str;
+                };
+                guildId = mkOption {
+                  type = types.str;
+                };
+                adminRoleId = mkOption {
+                  type = types.str;
+                };
+                redirectUri = mkOption {
+                  type = types.str;
+                };
+
+                clientSecretFile = mkOption {
+                  type = types.path;
+                };
+                infraClientSecretFile = mkOption {
+                  type = types.path;
+                };
+              };
+            };
           };
         };
 
@@ -146,10 +154,10 @@
             after = [ "network.target" ];
             wantedBy = [ "multi-user.target" ];
             environment = {
-              DISCORD_GUILD_ID = cfg.discordGuildId;
-              DISCORD_CLIENT_ID = cfg.discordClientId;
-              DISCORD_ADMIN_ROLE_ID = cfg.discordAdminRoleId;
-              DISCORD_REDIRECT_URI = cfg.discordRedirectUri;
+              DISCORD_GUILD_ID = cfg.discord.guildId;
+              DISCORD_CLIENT_ID = cfg.discord.clientId;
+              DISCORD_ADMIN_ROLE_ID = cfg.discord.adminRoleId;
+              DISCORD_REDIRECT_URI = cfg.discord.redirectUri;
 
               SQL_DB_URI = cfg.databaseUrl;
             };
@@ -171,7 +179,7 @@
               Restart = "on-failure";
               LoadCredential = [
                 "discord-infra-client-secret:${cfg.infraClientSecretFile}"
-                "discord-client-secret:${cfg.discordClientSecretFile}"
+                "discord-client-secret:${cfg.discord.clientSecretFile}"
                 "app-secret-key:${cfg.appSecretKeyFile}"
               ];
             };
@@ -184,6 +192,15 @@
             };
           };
             
+          systemd.tmpfiles.settings."10-website" = {
+            "/var/lib/website" = {
+              d = {
+                user = "jut-website";
+                mode = "0755";
+                group = "jut-website";
+              };
+            };
+          };
 
           users.users.jut-website = {
             isSystemUser = true;
