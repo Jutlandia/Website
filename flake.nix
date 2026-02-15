@@ -179,7 +179,7 @@
 
           services.nginx.enable = true;
           services.nginx.virtualHosts."${cfg.domain}" = {
-            location."/" = {
+            locations."/" = {
               proxyPass = "http://127.0.0.1:5000";
             };
           };
