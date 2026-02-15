@@ -161,6 +161,13 @@
 
               SQL_DB_URI = cfg.databaseUrl;
             };
+            script = ''
+              DISCORD_INFRA_CLIENT_SECRET="$(cat $CREDENTIALS_DIRECTORY/discord-infra-client-secret)"
+              DISCORD_CLIENT_SECRET="$(cat $CREDENTIALS_DIRECTORY/discord-client-secret)"
+              APP_SECRET_KEY="$(cat $CREDENTIALS_DIRECTORY/app-secret-key)"
+
+              ${jutlandia-site}/bin/run_site
+            '';
             serviceConfig = let
               run_site = pkgs.writeShellScript "load-secrets-and-run.sh" ''
               DISCORD_INFRA_CLIENT_SECRET="$(cat $CREDENTIALS_DIRECTORY/discord-infra-client-secret)"
@@ -175,7 +182,7 @@
               LimitNOFILE = 1048576;
               NoNewPrivileges = true;
               User = "jut-website";
-              ExecStart = "${run_site}";
+              # ExecStart = "${run_site}";
               Restart = "on-failure";
               LoadCredential = [
                 "discord-infra-client-secret:${cfg.discord.infraClientSecretFile}"
