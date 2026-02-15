@@ -178,7 +178,7 @@
           };
 
           services.nginx.enable = true;
-          services.nginx.virtHosts."${cfg.domain}" = {
+          services.nginx.virtualHosts."${cfg.domain}" = {
             location."/" = {
               proxyPass = "http://127.0.0.1:5000";
             };
