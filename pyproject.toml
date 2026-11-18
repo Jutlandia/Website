@@ -23,3 +23,5 @@ build-backend = "uv_build"
 #module-root = "src"
 module-name = "jutlandia_site"
 
+[tool.uv.extra-build-dependencies]
+markupsafe = ["setuptools"]
